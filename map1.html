@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Interactive Choropleth Map</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <style>
+    :root{
+    --bg:#f5f7fa;
+    --surface:#ffffff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --accent:#2563eb;
+    --border:#e5e7eb;
+    --shadow:0 10px 28px rgba(0,0,0,0.06);
+    --radius:20px;
+    --max-width:1150px;
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      font-family:'Inter', sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.8;
+    }
+
+    img{
+      max-width:100%;
+      display:block;
+    }
+
+    .container{
+      width:min(92%, var(--max-width));
+      margin:auto;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: Trebuchet MS, sans-serif;
+    }
+
+    .map-section {
+      padding: 4rem 0;
+    }
+
+    .map-wrapper{
+      background:var(--surface);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:1.2rem;
+      border:1px solid var(--border);
+    }
+
+    #map {
+      height: 70vh;
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+    }
+
+    /* Info box (hover panel) */
+    .info {
+      padding: 8px 10px;
+      font: 14px/16px Arial, Helvetica, sans-serif;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 6px;
+    }
+
+    /* ======================
+       HEADER (CLEAN TEMPLATE STYLE)
+    ====================== */
+    header{
+      position:sticky;
+      top:0;
+      z-index:1000;
+      background:rgba(255,255,255,0.9);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid var(--border);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    nav{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:1rem 0;
+    }
+
+    .logo{
+      font-weight:700;
+      font-size:1.05rem;
+    }
+
+    .nav-links{
+      display:flex;
+      gap:1.5rem;
+    }
+
+    .nav-links a{
+      color:var(--muted);
+      text-decoration:none;
+      transition:0.2s;
+    }
+
+    .nav-links a:hover{
+      color:var(--accent);
+    }
+
+    .info h4 {
+      margin: 0 0 6px;
+      color: #777;
+    }
+
+    /* =========================
+         HERO
+      ========================== */
+
+      .hero{
+        padding:6rem 0 4rem;
+      }
+
+      .hero h1{
+        font-family:'Merriweather',serif;
+        font-size:clamp(2.4rem,6vw,4.5rem);
+        line-height:1.15;
+        margin-bottom:1.3rem;
+      }
+
+      .hero p{
+        color:var(--muted);
+        max-width:800px;
+        font-size:1.1rem;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .hero-meta{
+        margin-top:2rem;
+        display:flex;
+        flex-wrap:wrap;
+        gap:1rem;
+      }
+
+      .meta-item{
+        background:rgba(37, 99, 235, 0.15);
+        color:var(--accent);
+        padding:0.6rem 1rem;
+        border-radius:999px;
+        font-size:0.92rem;
+        font-weight:600;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+    /* =========================
+        CONTENT
+    ========================== */
+
+      section{
+        padding-bottom:4rem;
+      }
+
+      .content-grid{
+        display:grid;
+        grid-template-columns:2fr 1fr;
+        gap:3rem;
+        align-items:start;
+      }
+
+      .content-card{
+        background:var(--surface);
+        border-radius:var(--radius);
+        padding:2.2rem;
+        border:1px solid var(--border);
+        box-shadow:var(--shadow);
+        margin-bottom:2rem;
+      }
+
+      .content-card h2{
+        font-family:'Georgia',serif;
+        margin-bottom:1rem;
+        font-size:1.6rem;
+      }
+
+      .content-card p{
+        color:var(--muted);
+        margin-bottom:1.2rem;
+      }
+
+      .content-card ul{
+        padding-left:1.2rem;
+        color:var(--muted);
+      }
+
+    /* =========================
+        SIDEBAR
+    ========================== */
+
+      .sidebar-card{
+        background:var(--surface);
+        border-radius:var(--radius);
+        padding:2rem;
+        border:1px solid var(--border);
+        box-shadow:var(--shadow);
+        margin-bottom:2rem;
+      }
+
+      .sidebar-card h3{
+        margin-bottom:1rem;
+        font-size:1.1rem;
+      }
+
+      .sidebar-card p{
+        color:var(--muted);
+        margin-bottom:0.7rem;
+        font-size:0.95rem;
+      }
+
+    /* =========================
+        GALLERY
+    ========================== */
+
+      .gallery{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+        gap:1.5rem;
+        margin-top:2rem;
+      }
+
+      .gallery-item{
+        height:450px;
+        border-radius:16px;
+        overflow:hidden;
+        border:1px solid var(--border);
+      }
+
+      .gallery-item img{
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        display:block;
+      }
+
+      .modal{
+        display:none;
+        position:fixed;
+        z-index:9999;
+        left:0;
+        top:0;
+        width:100%;
+        height:100%;
+        background:rgba(0,0,0,0.85);
+
+        justify-content:center;
+        align-items:center;
+      }
+
+      .modal-content{
+        max-width:90%;
+        max-height:90%;
+        border-radius:12px;
+        box-shadow:0 10px 30px rgba(0,0,0,0.4);
+        cursor:pointer;
+      }
+
+      .close{
+        position:absolute;
+        top:20px;
+        right:30px;
+        color:white;
+        font-size:40px;
+        font-weight:bold;
+        cursor:pointer;
+        z-index:10000;
+      }
+
+      .close:hover{
+        opacity:0.7;
+      }
+
+      .gallery-item img{
+        cursor:pointer;
+      }
+
+    /* Legend */
+    .legend {
+      text-align: left;
+      line-height: 18px;
+      color: #555;
+    }
+
+    .legend i {
+      width: 18px;
+      height: 18px;
+      float: left;
+      margin-right: 8px;
+      opacity: 0.8;
+    }
+
+    /* FOOTER */
+
+      footer{
+      padding:4rem 0;
+      text-align:center;
+      color:var(--muted);
+      font-size:0.95rem;
+      }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="container">
+      <nav>
+        <div class="logo">GIS Portfolio</div>
+
+        <div class="nav-links">
+          <a href="Student_website_template.html">← Back to Portfolio</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- =========================
+       HERO
+  ========================== -->
+
+  <section class="hero">
+
+    <div class="container">
+
+      <h1>
+        Choropleth Map
+      </h1>
+
+      <p>
+        Write a short professional summary of the project here.
+        Explain the purpose of the project,
+        the research question,
+        or the sustainability challenge addressed.
+      </p>
+
+      <div class="hero-meta">
+
+        <div class="meta-item">
+          GIS Analysis
+        </div>
+
+        <div class="meta-item">
+          Remote Sensing
+        </div>
+
+        <div class="meta-item">
+          Sustainability
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- INTERACTIVE MAP -->
+
+    <div class="container">
+
+      <div class="map-wrapper">
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <br>
+    <br>
+
+  <!-- =========================
+       MAIN CONTENT
+  ========================== -->
+
+  <section>
+
+    <div class="container">
+
+      <div class="content-grid">
+
+        <!-- LEFT CONTENT -->
+        <div>
+
+          <!-- PROJECT OVERVIEW -->
+          <div class="content-card">
+
+            <h2>Project Overview</h2>
+
+            <p>
+              Introduce the project in more detail here.
+              Describe the context, motivation,
+              and overall goals of the work.
+            </p>
+
+            <p>
+              This section can explain:
+            </p>
+
+            <ul>
+              <li>Research objectives</li>
+              <li>Study area</li>
+              <li>Environmental or social relevance</li>
+              <li>Why GIS methods were appropriate</li>
+            </ul>
+
+          </div>
+
+          <!-- METHODS -->
+          <div class="content-card">
+
+            <h2>Methods</h2>
+
+            <p>
+              Describe the GIS workflow and methods used.
+            </p>
+
+            <ul>
+              <li>Data collection</li>
+              <li>Spatial analysis techniques</li>
+              <li>Remote sensing processing</li>
+              <li>Cartographic design choices</li>
+              <li>Software and tools used</li>
+            </ul>
+
+          </div>
+
+          <!-- RESULTS -->
+          <div class="content-card">
+
+            <h2>Results &amp; Findings</h2>
+
+            <p>
+              Explain the major findings of the project.
+              Discuss spatial patterns,
+              environmental implications,
+              or planning recommendations.
+            </p>
+
+            <div class="gallery">
+
+              <div class="gallery-item">
+                <img
+                  src="UN_wom_par_final_map.jpg"
+                  alt="Map 1"
+                  onclick="openModal(this.src)">
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- SIDEBAR -->
+        <div>
+
+          <!-- PROJECT DETAILS -->
+          <div class="sidebar-card">
+
+            <h3>Project Details</h3>
+
+            <p><strong>Student:</strong> Nicole Gonzalez Meiler</p>
+
+            <p><strong>Course:</strong> Geographical Information Systems</p>
+
+            <p><strong>Instructor:</strong> Britta Ricker</p>
+
+            <p><strong>Date:</strong> Summer term 2026</p>
+
+          </div>
+
+          <!-- SOFTWARE -->
+          <div class="sidebar-card">
+
+            <h3>Software &amp; Tools</h3>
+
+            <p>QGIS</p>
+
+            <p>ArcGIS Pro</p>
+
+            <p>Google Earth Engine</p>
+
+            <p>MapLibre GL</p>
+
+            <p>Python</p>
+
+          </div>
+
+          <!-- REFLECTION -->
+          <div class="content-card">
+
+            <h2>Reflection</h2>
+
+            <p>
+              Discuss lessons learned,
+              project limitations,
+              and ideas for future improvements.
+            </p>
+
+            <p>
+              This section is useful for showing critical thinking,
+              technical growth,
+              and understanding of spatial analysis.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    © 2026 GIS Student Portfolio
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="Choropleth_tutorial_1_UN_wom_par_2023_GEOJSON.geojson"></script>
+
+
+<script>
+
+// 1. MAP SETUP (global view like SDG map)
+const map = L.map('map', {
+  center: [15, 5],
+  zoom: 2,
+  minZoom: 2,
+  maxZoom: 7,
+  maxBounds: [[-90, -180], [90, 180]],
+  maxBoundsViscosity: 1.0,
+  noWrap: true
+});
+
+// 2. BASEMAP
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap'
+}).addTo(map);
+
+// 3. HOVER INFO CONTROL
+const info = L.control();
+
+info.onAdd = function () {
+  this._div = L.DomUtil.create('div', 'info');
+  this.update();
+  return this._div;
+};
+
+info.update = function (props) {
+  const contents = props
+    ? `<b>${props.nam_en}</b><br>${props.Per_Wom_Par_2023}% women in parliament`
+    : 'Hover over a country';
+
+  this._div.innerHTML =
+    `<h4>Women in National Parliaments (2023)</h4>${contents}`;
+};
+
+info.addTo(map);
+
+// 4. COLOR SCALE
+function getColor(d) {
+  return d >= 50 ? '#004c28' :
+         d > 40  ? '#006837' :
+         d > 30  ? '#31a354' :
+         d > 20  ? '#78c679' :
+         d > 10  ? '#c2e699' :
+         d > 0   ? '#ffffcc' :
+                   '#d6d6d6';
+}
+
+// 5. STYLE FUNCTION (choropleth)
+function style(feature) {
+  return {
+    weight: 1.2,
+    opacity: 0.8,
+    color: 'white',
+    fillOpacity: 0.9,
+    fillColor: getColor(feature.properties.Per_Wom_Par_2023)
+  };
+}
+
+// 6. INTERACTION FUNCTIONS
+function highlightFeature(e) {
+  const layer = e.target;
+
+  layer.setStyle({
+    weight: 4,
+    color: '#666',
+    fillOpacity: 0.7
+  });
+
+  layer.bringToFront();
+  info.update(layer.feature.properties);
+}
+
+function resetHighlight(e) {
+  geojson.resetStyle(e.target);
+  info.update();
+}
+
+function zoomToFeature(e) {
+  map.fitBounds(e.target.getBounds());
+}
+
+// 7. ON EACH FEATURE
+function onEachFeature(feature, layer) {
+  layer.on({
+    mouseover: highlightFeature,
+    mouseout: resetHighlight,
+    click: zoomToFeature
+  });
+}
+
+// 8. ADD GEOJSON LAYER
+const geojson = L.geoJson(nationData, {
+  style: style,
+  onEachFeature: onEachFeature
+}).addTo(map);
+
+// 9. FIT BOUNDS
+map.fitBounds(geojson.getBounds());
+
+// 10. LEGEND
+const legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function () {
+
+  const div = L.DomUtil.create('div', 'info legend');
+  const grades = [0, 10, 20, 30, 40, 50];
+
+  let labels = [];
+
+  for (let i = 0; i < grades.length; i++) {
+    const from = grades[i];
+    const to = grades[i + 1];
+
+    labels.push(
+      `<i style="background:${getColor(from + 1)}"></i> ` +
+      `${from}${to ? '–' + to : '+'}`
+    );
+  }
+
+  labels.push(`<i style="background:#d6d6d6"></i> No Data`);
+
+  div.innerHTML = labels.join('<br>');
+  return div;
+};
+
+legend.addTo(map);
+
+</script>
+
+<script>
+function openModal(imageSrc){
+  document.getElementById("modalImage").src = imageSrc;
+  document.getElementById("imageModal").style.display = "flex";
+}
+
+function closeModal(){
+  document.getElementById("imageModal").style.display = "none";
+}
+</script>
+
+<div id="imageModal" class="modal" onclick="closeModal()">
+  <span class="close" onclick="closeModal()">&times;</span>
+  <img id="modalImage" class="modal-content">
+</div>
+
+</body>
+</html>
