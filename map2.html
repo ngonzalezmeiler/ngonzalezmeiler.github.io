@@ -242,7 +242,7 @@
       }
 
       .gallery-item{
-        height:450px;
+        height:180px;
         border-radius:16px;
         overflow:hidden;
         border:1px solid var(--border);
@@ -409,21 +409,10 @@
             <h2>Project Overview</h2>
 
             <p>
-              Introduce the project in more detail here.
-              Describe the context, motivation,
-              and overall goals of the work.
+              This project examined vegetation health and land cover dynamics within a forested region of Angola through the analysis of the Normalized Difference Vegetation Index (NDVI). The primary objective was to assess vegetation conditions at two points in time, 2018 and 2024, and to identify areas where vegetation cover had improved, remained stable, or declined.
+              <br>
+              Five maps were produced as part of the project: a true color map of the forestation of a region of Angola in 2018, a true color map of the forestation of a region of Angola in 2024, in an NDVI map for 2018, an NDVI map for 2024, and a change detection map showing the differences in NDVI values between the two years. These maps provided a visual representation of vegetation density and health, allowing for the investigation of environmental changes and potential drivers such as deforestation, land use change, regeneration, or climate-related impacts.
             </p>
-
-            <p>
-              This section can explain:
-            </p>
-
-            <ul>
-              <li>Research objectives</li>
-              <li>Study area</li>
-              <li>Environmental or social relevance</li>
-              <li>Why GIS methods were appropriate</li>
-            </ul>
 
           </div>
 
@@ -433,16 +422,13 @@
             <h2>Methods</h2>
 
             <p>
-              Describe the GIS workflow and methods used.
-            </p>
-
-            <ul>
-              <li>Data collection</li>
-              <li>Spatial analysis techniques</li>
-              <li>Remote sensing processing</li>
-              <li>Cartographic design choices</li>
-              <li>Software and tools used</li>
-            </ul>
+              The project began with obtaining satellite imagery covering the selected forest area in Angola for the years 2018 and 2024, which was collected through Google Earth Engine. The imagery was processed within a GIS environment to calculate NDVI values for each year.
+              <br> <br>
+              NDVI was derived using the standard formula that compares the reflectance values of the near-infrared (NIR) and red spectral bands. The resulting values ranged from -1 to 1, with higher values indicating denser and healthier vegetation and lower values representing sparse vegetation, bare ground, or non-vegetated surfaces.
+              <br> <br>
+              Separate NDVI maps were generated for 2018 and 2024 using a colour gradient to visualise variations in vegetation health across the study area. These maps were then compared through raster analysis techniques to calculate the change in NDVI values over time.
+             <br> <br>
+              A change detection map was created by subtracting the 2018 NDVI raster from the 2024 NDVI raster. Positive values indicated areas where vegetation health or density had increased, while negative values highlighted areas of vegetation decline. The resulting map enabled the identification of spatial patterns of environmental change across the forest region.            </p>
 
           </div>
 
@@ -519,13 +505,11 @@
 
             <p>QGIS</p>
 
-            <p>ArcGIS Pro</p>
-
             <p>Google Earth Engine</p>
 
-            <p>MapLibre GL</p>
+            <p>Sublime</p>
 
-            <p>Python</p>
+            <p>Javascript</p>
 
           </div>
 
@@ -535,15 +519,11 @@
             <h2>Reflection</h2>
 
             <p>
-              Discuss lessons learned,
-              project limitations,
-              and ideas for future improvements.
-            </p>
-
-            <p>
-              This section is useful for showing critical thinking,
-              technical growth,
-              and understanding of spatial analysis.
+              This project enhanced my understanding of remote sensing, environmental monitoring, and raster-based GIS analysis. Calculating NDVI for multiple years provided practical experience in working with satellite imagery and interpreting vegetation health indicators.
+              <br> <br>
+              Creating the NDVI change map demonstrated how raster analysis can reveal environmental trends that may not be immediately visible in individual datasets. The project provided insights into areas experiencing vegetation growth as well as locations where vegetation cover may have declined, allowing for a more detailed understanding of landscape change.
+              <br> <br>
+              Overall, the project strengthened my skills in GIS, remote sensing, and environmental analysis. It demonstrated the effectiveness of NDVI as a tool for monitoring vegetation dynamics and showed how multi-temporal satellite imagery can be used to investigate ecosystem change over time. These skills are highly applicable to fields such as environmental management, conservation, land use planning, and climate impact assessment.
             </p>
 
           </div>
